@@ -1,0 +1,1923 @@
+
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Island 業績小工具（多店/類別/甘特/活動口味/成本）</title>
+  <style>
+    :root{
+      --bg:#fff7f4;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --text:#3b2f2a;
+      --line:#f1d6cf;
+
+      --good:#2f9e66;
+      --bad:#e25555;
+      --warn:#d9a441;
+      --accent:#6b8ff5;
+
+      --r:18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans TC", "PingFang TC";
+      color:var(--text);
+      font-size:16px;
+
+      background-color: var(--bg);
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Crect width='240' height='240' fill='%23fff7f4'/%3E%3Cg opacity='0.22'%3E%3Cpath d='M64 62c0-14 12-26 26-26h24c14 0 26 12 26 26v6c0 7-6 13-13 13H77c-7 0-13-6-13-13v-6z' fill='%23f2c9be'/%3E%3Cpath d='M78 86h84c6 0 11 5 11 11v18c0 26-21 47-47 47H101c-26 0-47-21-47-47V97c0-6 5-11 11-11z' fill='%23ffe3d8' stroke='%23f1b8aa' stroke-width='3'/%3E%3Cpath d='M160 148c10-6 18-16 18-30' fill='none' stroke='%23f1b8aa' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M94 108c10-7 21-7 31 0' fill='none' stroke='%23f1b8aa' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M114 108c10-7 21-7 31 0' fill='none' stroke='%23f1b8aa' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='186' cy='64' r='6' fill='%23d9a441'/%3E%3Cpath d='M38 168l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2 5-10z' fill='%236b8ff5'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 260px 260px;
+    }
+
+    header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(10px);
+      background: rgba(255,247,244,.92);
+      border-bottom:1px solid var(--line);
+    }
+
+    .wrap{max-width:1120px; margin:0 auto; padding:12px 14px;}
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    h1{margin:0; font-size:18px; letter-spacing:.3px}
+    .sub{color:var(--muted); font-size:12px; margin-top:4px}
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .tab{
+      padding:8px 12px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background: rgba(255,255,255,.8);
+      cursor:pointer;
+      user-select:none;
+      font-weight:650;
+    }
+    .tab.active{
+      background: rgba(107,143,245,.18);
+      border-color: rgba(107,143,245,.45);
+    }
+
+    main{padding:14px}
+    .grid{display:grid; gap:12px}
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      padding:14px;
+      box-shadow: 0 8px 18px rgba(59,47,42,.06);
+    }
+    .split{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+    .title{font-weight:800}
+    .badge{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(16,24,40,.03);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    label{display:block; color:var(--muted); font-size:12px; margin-bottom:6px}
+    input, select, textarea{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      outline:none;
+      background:#fff;
+      color:var(--text);
+      font-size:16px;
+    }
+    textarea{min-height:90px; resize:vertical}
+    input:focus, select:focus, textarea:focus{border-color: rgba(107,143,245,.55); box-shadow: 0 0 0 3px rgba(107,143,245,.15)}
+
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .row > *{flex:1; min-width:160px}
+    .btns{display:flex; gap:10px; flex-wrap:wrap}
+    button{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(107,143,245,.15);
+      cursor:pointer;
+      font-weight:750;
+      font-size:16px;
+      color:var(--text);
+    }
+    button:hover{background: rgba(107,143,245,.22)}
+    .btn2{background: rgba(59,47,42,.05)}
+    .btn2:hover{background: rgba(59,47,42,.08)}
+    .danger{background: rgba(226,85,85,.12)}
+    .danger:hover{background: rgba(226,85,85,.16)}
+
+    table{width:100%; border-collapse:collapse}
+    th, td{padding:10px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+    th{font-size:12px; color:#4b5563}
+    td{font-size:14px}
+    .hint{color:var(--muted); font-size:12px; line-height:1.5}
+    .kpi{
+      display:grid; gap:10px;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+    }
+    @media (max-width: 900px){ .kpi{grid-template-columns: repeat(2, minmax(160px, 1fr));} }
+    .kpiBox{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+      background: rgba(255,255,255,.8);
+    }
+    .kpiBox .n{font-size:20px; font-weight:900}
+    .pos{color:var(--good); font-weight:800}
+    .neg{color:var(--bad); font-weight:800}
+    .na{color:var(--muted); font-weight:700}
+
+    /* Gantt */
+    .gantt{
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+      background: var(--card);
+    }
+    .ganttHead{
+      display:grid;
+      grid-template-columns: 220px 1fr;
+      border-bottom:1px solid var(--line);
+    }
+    .ganttHead .left{
+      padding:10px 12px;
+      font-weight:900;
+    }
+    .ganttHead .right{
+      display:grid;
+      grid-auto-flow:column;
+      grid-auto-columns: 1fr;
+    }
+    .ganttHead .cell{
+      padding:10px 8px;
+      border-left:1px solid var(--line);
+      text-align:center;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .ganttRow{
+      display:grid;
+      grid-template-columns: 220px 1fr;
+      border-bottom:1px solid var(--line);
+    }
+    .ganttRow:last-child{ border-bottom:none; }
+    .ganttRow .left{
+      padding:10px 12px;
+      font-weight:850;
+      color:var(--text);
+    }
+    .ganttRow .right{
+      position:relative;
+      padding:12px;
+    }
+    .ganttBar{
+      position:absolute;
+      height:28px;
+      border-radius:999px;
+      background: rgba(107,143,245,.25);
+      border:1px solid rgba(107,143,245,.45);
+      display:flex;
+      align-items:center;
+      padding:0 10px;
+      gap:8px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+    .ganttBar .note{
+      font-size:12px;
+      opacity:.95;
+      font-weight:800;
+    }
+    .ganttBar .meta{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .msg{margin-top:10px; color:var(--muted); font-size:12px}
+    .pill{
+      display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid var(--line);
+      font-size:12px; color:var(--muted); background: rgba(255,255,255,.8);
+    }
+    .mini{
+      padding:6px 10px; border-radius:12px; border:1px solid var(--line);
+      background: rgba(59,47,42,.04); color:var(--muted); font-size:12px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>業績小工具（多店 / 類別 / 甘特 / 活動口味 / 成本）</h1>
+        <div class="sub">自動儲存｜日系可愛烘焙主題｜不用檔期ID（檔期只做排程與備註）</div>
+      </div>
+      <div class="pill" id="saveState">已載入</div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="home">總覽</div>
+      <div class="tab" data-tab="daily">日報</div>
+      <div class="tab" data-tab="mix">月度類別營收</div>
+      <div class="tab" data-tab="promo">活動口味</div>
+      <div class="tab" data-tab="cost">成本</div>
+      <div class="tab" data-tab="gantt">甘特圖</div>
+      <div class="tab" data-tab="settings">設定</div>
+      <div class="tab" data-tab="backup">備份</div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- HOME -->
+  <section id="tab_home" class="grid">
+    <section class="card">
+      <div class="split">
+        <div class="title">總覽（選點位＋月份）</div>
+        <div class="badge">月增減 / 成長率｜每日平均｜類別佔比｜活動口味排行｜成本估算</div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>點位（location）</label>
+          <select id="h_loc"></select>
+        </div>
+        <div>
+          <label>月份</label>
+          <input id="h_month" type="month" />
+        </div>
+        <div>
+          <label>對照月份（上一個月）</label>
+          <input id="h_prevmonth" type="month" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn2" id="h_this">回到本月</button>
+        </div>
+      </div>
+
+      <div class="kpi" style="margin-top:12px;">
+        <div class="kpiBox">
+          <div class="hint">本月營業額</div>
+          <div class="n" id="k_rev">0</div>
+          <div class="hint" id="k_rev_mom"></div>
+        </div>
+        <div class="kpiBox">
+          <div class="hint">本月交易筆數</div>
+          <div class="n" id="k_tx">0</div>
+          <div class="hint" id="k_tx_avg"></div>
+        </div>
+        <div class="kpiBox">
+          <div class="hint">每日平均營業額</div>
+          <div class="n" id="k_avg">0</div>
+          <div class="hint" id="k_days"></div>
+        </div>
+        <div class="kpiBox">
+          <div class="hint">月目標差距（可選）</div>
+          <div class="n" id="k_gap">—</div>
+          <div class="hint" id="k_gap_hint"></div>
+        </div>
+      </div>
+
+      <div class="split" style="margin-top:14px;">
+        <div class="title">成本估算（以本月日報總營收計算）</div>
+        <div class="hint">到「成本」頁設定各點位抽成/固定費/原物料比例</div>
+      </div>
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="costTable">
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th>金額</th>
+              <th>備註</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="split" style="margin-top:14px;">
+        <div class="title">類別佔比（分母 = 總營業額）</div>
+        <div class="hint">八入組也會一起算佔比</div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="catTable">
+          <thead>
+            <tr>
+              <th>類別</th>
+              <th>本月營收</th>
+              <th>佔總營收</th>
+              <th>月增減</th>
+              <th>成長率</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="split" style="margin-top:14px;">
+        <div class="title">活動日吐司口味 Top（只看活動日）</div>
+        <div class="hint">需：日報活動日=Yes + 活動口味頁輸入口味數量</div>
+      </div>
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="promoRankTable">
+          <thead>
+            <tr>
+              <th>排名</th>
+              <th>口味</th>
+              <th>活動日總數量</th>
+              <th>出現次數（活動日）</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="msg" id="homeMsg"></div>
+    </section>
+  </section>
+
+  <!-- DAILY -->
+  <section id="tab_daily" style="display:none" class="grid">
+    <section class="card">
+      <div class="split">
+        <div class="title">日報輸入（不用檔期ID）</div>
+        <div class="badge">日期 / 點位 / 營業額 / 交易筆數 / 是否活動</div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>日期</label>
+          <input id="d_date" type="date" />
+        </div>
+        <div>
+          <label>點位</label>
+          <select id="d_loc"></select>
+        </div>
+        <div>
+          <label>營業額</label>
+          <input id="d_amt" type="number" inputmode="numeric" placeholder="例如 12000" />
+        </div>
+        <div>
+          <label>交易筆數</label>
+          <input id="d_tx" type="number" inputmode="numeric" placeholder="例如 70" />
+        </div>
+        <div>
+          <label>活動日？</label>
+          <select id="d_promo">
+            <option value="no">否</option>
+            <option value="yes">是</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div style="min-width:240px; flex:2">
+          <label>備註</label>
+          <input id="d_note" placeholder="可留空" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="btnSaveDaily">儲存/更新</button>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn2" id="btnClearDaily">清空欄位</button>
+        </div>
+      </div>
+
+      <div class="split" style="margin-top:12px;">
+        <div class="title">本月日報列表</div>
+        <div class="hint">在總覽選月份；這裡會跟著顯示</div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="dailyTable">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>點位</th>
+              <th>營業額</th>
+              <th>交易筆數</th>
+              <th>活動</th>
+              <th>備註</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="msg" id="dailyMsg"></div>
+    </section>
+  </section>
+
+  <!-- MIX -->
+  <section id="tab_mix" style="display:none" class="grid">
+    <section class="card">
+      <div class="split">
+        <div class="title">月度類別營收（可一次順輸入，不跳格）</div>
+        <div class="badge">佔比 = 類別營收 ÷ 總營業額</div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>點位</label>
+          <select id="m_loc"></select>
+        </div>
+        <div>
+          <label>月份</label>
+          <input id="m_month" type="month" />
+        </div>
+        <div>
+          <label>月目標（可選）</label>
+          <input id="m_target" type="number" inputmode="numeric" placeholder="例如 250000" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn2" id="m_load">載入</button>
+        </div>
+      </div>
+
+      <div class="hint" id="mixHint" style="margin-top:10px;"></div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="mixTable">
+          <thead>
+            <tr>
+              <th>類別</th>
+              <th>本月營收（輸入）</th>
+              <th>佔總營收</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="msg" id="mixMsg"></div>
+    </section>
+  </section>
+
+  <!-- PROMO FLAVORS -->
+  <section id="tab_promo" style="display:none" class="grid">
+    <section class="card">
+      <div class="split">
+        <div class="title">活動日吐司口味輸入（只填活動日）</div>
+        <div class="badge">日期＋點位 → 多行口味/數量</div>
+      </div>
+
+      <div class="hint mini" style="margin-top:10px;">
+        規則：此頁輸入的日期，建議日報同一天要設為「活動日 = 是」，總覽的活動排行才會完全一致。
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>日期（活動日）</label>
+          <input id="p_date" type="date" />
+        </div>
+        <div>
+          <label>點位</label>
+          <select id="p_loc"></select>
+        </div>
+        <div style="flex:2; min-width:240px;">
+          <label>快速新增一行（口味）</label>
+          <select id="p_flavorPick"></select>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn2" id="btnAddFlavorRow">新增一行</button>
+        </div>
+      </div>
+
+      <div class="split" style="margin-top:12px;">
+        <div class="title">口味明細</div>
+        <div class="hint">輸入後會自動儲存</div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="promoEditTable">
+          <thead>
+            <tr>
+              <th>口味</th>
+              <th>數量</th>
+              <th>刪除</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="btns" style="margin-top:10px;">
+        <button id="btnSavePromo">儲存活動口味</button>
+        <button class="btn2" id="btnClearPromo">清空表格</button>
+      </div>
+
+      <div class="split" style="margin-top:14px;">
+        <div class="title">本月活動日清單（來源：日報 is_promo=yes）</div>
+        <div class="hint">方便你核對哪些天該填口味</div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="promoDaysTable">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>營業額</th>
+              <th>交易</th>
+              <th>是否已填口味</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="msg" id="promoMsg"></div>
+    </section>
+  </section>
+
+  <!-- COST -->
+  <section id="tab_cost" style="display:none" class="grid">
+    <section class="card">
+      <div class="split">
+        <div class="title">設櫃成本設定（每點位一套）</div>
+        <div class="badge">抽成% / 固定費 / 水電 / 硬體 / 輸出 / 人力 / 原物料比例</div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>點位</label>
+          <select id="cst_loc"></select>
+        </div>
+        <div>
+          <label>抽成（%）</label>
+          <input id="cst_comm" type="number" inputmode="decimal" placeholder="例如 16" />
+        </div>
+        <div>
+          <label>固定費用</label>
+          <input id="cst_fixed" type="number" inputmode="numeric" placeholder="例如 320000" />
+        </div>
+        <div>
+          <label>水電費</label>
+          <input id="cst_util" type="number" inputmode="numeric" placeholder="例如 8000" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>硬體費用</label>
+          <input id="cst_hw" type="number" inputmode="numeric" placeholder="例如 5000" />
+        </div>
+        <div>
+          <label>輸出費用</label>
+          <input id="cst_out" type="number" inputmode="numeric" placeholder="例如 6000" />
+        </div>
+        <div>
+          <label>人力費用</label>
+          <input id="cst_labor" type="number" inputmode="numeric" placeholder="例如 90000" />
+        </div>
+        <div>
+          <label>原物料比例（%）</label>
+          <input id="cst_mat" type="number" inputmode="decimal" placeholder="例如 45" />
+        </div>
+      </div>
+
+      <div class="btns" style="margin-top:10px;">
+        <button id="btnSaveCost">儲存成本設定</button>
+        <button class="btn2" id="btnClearCost">清空欄位</button>
+      </div>
+
+      <div class="split" style="margin-top:14px;">
+        <div class="title">所有點位成本一覽</div>
+        <div class="hint">可刪除</div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="costManageTable">
+          <thead>
+            <tr>
+              <th>點位</th>
+              <th>抽成%</th>
+              <th>固定成本合計</th>
+              <th>原物料%</th>
+              <th>刪除</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="msg" id="costMsg"></div>
+    </section>
+  </section>
+
+  <!-- GANTT -->
+  <section id="tab_gantt" style="display:none" class="grid">
+    <section class="card">
+      <div class="split">
+        <div class="title">檔期甘特圖（每月 / 每年）</div>
+        <div class="badge">檔期只做排程與「位置備註」</div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>視角</label>
+          <select id="g_mode">
+            <option value="month">每月</option>
+            <option value="year">每年</option>
+          </select>
+        </div>
+        <div>
+          <label>月份（每月模式）</label>
+          <input id="g_month" type="month" />
+        </div>
+        <div>
+          <label>年份（每年模式）</label>
+          <input id="g_year" type="number" inputmode="numeric" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn2" id="g_today">回到本月</button>
+        </div>
+      </div>
+
+      <div class="hint" id="g_rangeHint" style="margin-top:10px;"></div>
+
+      <div class="split" style="margin-top:12px;">
+        <div class="title">新增檔期</div>
+        <div class="hint">不用檔期ID，你只要填：點位＋日期＋備註（位置）</div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>點位</label>
+          <select id="cg_loc"></select>
+        </div>
+        <div>
+          <label>開始日期</label>
+          <input id="cg_start" type="date" />
+        </div>
+        <div>
+          <label>結束日期</label>
+          <input id="cg_end" type="date" />
+        </div>
+        <div style="flex:2; min-width:240px">
+          <label>備註（位置/櫃位）</label>
+          <input id="cg_note" placeholder="例如：A8 1F 入口旁" />
+        </div>
+      </div>
+
+      <div class="btns" style="margin-top:10px;">
+        <button id="btnAddCampaign">新增檔期</button>
+        <button class="btn2" id="btnClearCampaign">清空</button>
+      </div>
+
+      <div class="split" style="margin-top:12px;">
+        <div class="title">甘特圖</div>
+        <div class="hint">同點位多檔期會往下堆疊</div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <div id="ganttWrap" style="min-width:900px;"></div>
+      </div>
+
+      <div class="split" style="margin-top:12px;">
+        <div class="title">檔期清單</div>
+        <div class="hint">可刪除</div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="campTable">
+          <thead>
+            <tr>
+              <th>點位</th>
+              <th>開始</th>
+              <th>結束</th>
+              <th>備註</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="msg" id="ganttMsg"></div>
+    </section>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="tab_settings" style="display:none" class="grid">
+    <section class="card">
+      <div class="split">
+        <div class="title">設定</div>
+        <div class="badge">點位管理 / 類別管理</div>
+      </div>
+
+      <div class="split" style="margin-top:12px;">
+        <div class="title">點位（locations）</div>
+        <div class="hint">新增、刪除、重命名</div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:2; min-width:240px">
+          <label>新增點位名稱</label>
+          <input id="s_newLoc" placeholder="例如：新光A8" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="btnAddLoc">新增點位</button>
+        </div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="locTable">
+          <thead>
+            <tr>
+              <th>點位</th>
+              <th>重命名</th>
+              <th>刪除</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="split" style="margin-top:14px;">
+        <div class="title">類別（categories）</div>
+        <div class="hint">你要把「八入組」當類別：已預設包含</div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:2; min-width:240px">
+          <label>新增類別</label>
+          <input id="s_newCat" placeholder="例如：山都威士忌" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="btnAddCat">新增類別</button>
+        </div>
+      </div>
+
+      <div style="overflow:auto; margin-top:10px;">
+        <table id="catManageTable">
+          <thead>
+            <tr>
+              <th>類別</th>
+              <th>刪除</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="msg" id="settingsMsg"></div>
+    </section>
+  </section>
+
+  <!-- BACKUP -->
+  <section id="tab_backup" style="display:none" class="grid">
+    <section class="card">
+      <div class="split">
+        <div class="title">備份 / 還原</div>
+        <div class="badge">匯出 JSON｜匯入 JSON</div>
+      </div>
+
+      <div class="btns" style="margin-top:10px;">
+        <button id="btnExport">匯出備份（JSON）</button>
+        <button class="danger" id="btnReset">清空所有資料（小心）</button>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div style="min-width:320px; flex:1">
+          <label>匯入備份（JSON）</label>
+          <input id="importJson" type="file" accept=".json,application/json" />
+        </div>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        小提醒：資料會自動儲存在此瀏覽器。要換電腦或換瀏覽器，請先匯出 JSON，再匯入。
+      </div>
+
+      <div class="msg" id="backupMsg"></div>
+    </section>
+  </section>
+</main>
+
+<script>
+  // ---------- Helpers ----------
+  const $ = (id)=>document.getElementById(id);
+  const fmt = (n)=> (Number.isFinite(n) ? n.toLocaleString("zh-Hant") : "—");
+  const safeNum = (x)=> {
+    const n = Number(String(x??"").replace(/,/g,"").trim());
+    return Number.isFinite(n) ? n : 0;
+  };
+  const monthISO = ()=>{
+    const d = new Date();
+    return d.toISOString().slice(0,7);
+  };
+  const prevMonthISO = (ym)=>{
+    const [y,m] = ym.split("-").map(Number);
+    const d = new Date(y, m-1, 1);
+    d.setMonth(d.getMonth()-1);
+    return d.toISOString().slice(0,7);
+  };
+  const todayISO = ()=> new Date().toISOString().slice(0,10);
+  const keyMix = ({location, month})=> `${location}||${month}`;
+  const keyPromo = ({location, date})=> `${location}||${date}`;
+  const dateToMonth = (date)=> date.slice(0,7);
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+  }
+
+  function pctText(curr, prev){
+    if(!(Number.isFinite(curr) && Number.isFinite(prev))) return `<span class="na">—</span>`;
+    const diff = curr - prev;
+    const rate = prev===0 ? (curr===0 ? NaN : Infinity) : (diff / prev);
+    const diffStr = `${diff>=0?"+":""}${fmt(diff)}`;
+    let rateStr = "—";
+    if(!Number.isFinite(rate)) rateStr = prev===0 && curr>0 ? "∞" : "—";
+    else rateStr = `${(rate*100).toFixed(1)}%`;
+    const cls = diff>0 ? "pos" : diff<0 ? "neg" : "na";
+    return `<span class="${cls}">${diffStr}</span>（${rateStr}）`;
+  }
+
+  function saveDB(){
+    localStorage.setItem("ISLAND_SALES_TOOL_V3", JSON.stringify(DB));
+    $("saveState").textContent = "已自動儲存";
+    setTimeout(()=> $("saveState").textContent="已載入", 700);
+  }
+
+  function loadDB(){
+    const raw = localStorage.getItem("ISLAND_SALES_TOOL_V3");
+    if(raw){
+      try{
+        const obj = JSON.parse(raw);
+        return obj;
+      }catch(e){}
+    }
+    return null;
+  }
+
+  // ---------- Data Model ----------
+  const DEFAULT_CATS = [
+    "吐司","甜點","牛軋糖","爆米花","飲品",
+    "山都威士忌",
+    "活動-八入組組合"
+  ];
+
+  // 你提供的吐司口味清單（用來避免名稱不一致）
+  const TOAST_FLAVORS = [
+    "蒜香","花生","奶酥","抹茶","松露","咖啡","夏威夷","培根","燻雞","法芙娜","焦糖","春雞","玉米",
+    "青醬","巧克力","芋頭鹹蛋","海鮮","珍奶"
+  ];
+
+  const DB = loadDB() || {
+    locations: ["預設點位"],
+    categories: [...DEFAULT_CATS],
+    daily: [],         // {date, location, amount, tx, isPromo, note}
+    monthlyMix: {},    // key: location||month -> {cat: amount}
+    targets: {},       // key: location||month -> number
+    campaigns: [],     // {id, location, start, end, note}
+    promoFlavors: {},  // key: location||date -> {flavor: qty}
+    costs: {}          // key: location -> {commRate, fixed, util, hw, out, labor, matRate}
+  };
+
+  // ---------- UI: Tabs ----------
+  const TABS = ["home","daily","mix","promo","cost","gantt","settings","backup"];
+  function setTab(name){
+    TABS.forEach(t=>{
+      $("tab_"+t).style.display = (t===name) ? "" : "none";
+    });
+    [...document.querySelectorAll(".tab")].forEach(el=>{
+      el.classList.toggle("active", el.dataset.tab===name);
+    });
+    renderAll();
+  }
+
+  // ---------- Select Options ----------
+  function setSelectOptions(sel, arr){
+    sel.innerHTML = arr.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+  }
+
+  function initSelectors(){
+    const locs = [...DB.locations].sort((a,b)=>a.localeCompare(b));
+    setSelectOptions($("h_loc"), locs);
+    setSelectOptions($("d_loc"), locs);
+    setSelectOptions($("m_loc"), locs);
+    setSelectOptions($("p_loc"), locs);
+    setSelectOptions($("cst_loc"), locs);
+    setSelectOptions($("cg_loc"), locs);
+
+    setSelectOptions($("p_flavorPick"), TOAST_FLAVORS);
+
+    const m = monthISO();
+    if(!$("h_month").value) $("h_month").value = m;
+    if(!$("h_prevmonth").value) $("h_prevmonth").value = prevMonthISO($("h_month").value || m);
+    if(!$("m_month").value) $("m_month").value = $("h_month").value || m;
+    if(!$("g_month").value) $("g_month").value = $("h_month").value || m;
+    if(!$("g_year").value) $("g_year").value = String(new Date().getFullYear());
+
+    if(!$("d_date").value) $("d_date").value = todayISO();
+    if(!$("p_date").value) $("p_date").value = todayISO();
+
+    const keep = (sel)=>{
+      const v = sel.value;
+      const opts = [...sel.querySelectorAll("option")].map(o=>o.value);
+      if(v && opts.includes(v)) sel.value = v;
+    };
+    keep($("h_loc")); keep($("d_loc")); keep($("m_loc"));
+    keep($("p_loc")); keep($("cst_loc")); keep($("cg_loc"));
+  }
+
+  // ---------- Daily ----------
+  function upsertDaily(row){
+    const idx = DB.daily.findIndex(d=> d.date===row.date && d.location===row.location);
+    if(idx>=0) DB.daily[idx] = row;
+    else DB.daily.push(row);
+    DB.daily.sort((a,b)=> (a.date+a.location).localeCompare(b.date+b.location));
+    saveDB();
+  }
+  function delDaily(date, location){
+    DB.daily = DB.daily.filter(d=> !(d.date===date && d.location===location));
+    saveDB();
+  }
+  function sumDaily({location, month}){
+    const rows = DB.daily.filter(d=> d.location===location && dateToMonth(d.date)===month);
+    const rev = rows.reduce((s,r)=>s+safeNum(r.amount),0);
+    const tx = rows.reduce((s,r)=>s+safeNum(r.tx),0);
+    const days = rows.length;
+    return {rows, rev, tx, days};
+  }
+
+  // ---------- Monthly Mix ----------
+  function ensureMix(location, month){
+    const k = keyMix({location, month});
+    DB.monthlyMix[k] ||= {};
+    DB.categories.forEach(c=>{
+      if(!(c in DB.monthlyMix[k])) DB.monthlyMix[k][c] = 0;
+    });
+    return k;
+  }
+  function getTarget(location, month){
+    const k = keyMix({location, month});
+    return safeNum(DB.targets[k] ?? 0);
+  }
+  function setTarget(location, month, n){
+    const k = keyMix({location, month});
+    DB.targets[k] = safeNum(n);
+    saveDB();
+  }
+
+  // ---------- Promo Flavors ----------
+  function ensurePromo(location, date){
+    const k = keyPromo({location, date});
+    DB.promoFlavors[k] ||= {};
+    return k;
+  }
+  function hasPromoFilled(location, date){
+    const k = keyPromo({location, date});
+    const obj = DB.promoFlavors[k];
+    if(!obj) return false;
+    return Object.keys(obj).some(fl=>safeNum(obj[fl])>0);
+  }
+
+  // ---------- Costs ----------
+  function getCost(location){
+    return DB.costs[location] || null;
+  }
+  function setCost(location, costObj){
+    DB.costs[location] = costObj;
+    saveDB();
+  }
+  function delCost(location){
+    delete DB.costs[location];
+    saveDB();
+  }
+  function fixedSum(c){
+    return safeNum(c.fixed)+safeNum(c.util)+safeNum(c.hw)+safeNum(c.out)+safeNum(c.labor);
+  }
+
+  // ---------- Campaigns (for Gantt only) ----------
+  function genCampId(){
+    const t = new Date();
+    const stamp = t.toISOString().slice(0,10).replaceAll("-","");
+    const seq = String(DB.campaigns.length+1).padStart(3,"0");
+    return `CP_${stamp}_${seq}`;
+  }
+  function addCampaign({location, start, end, note}){
+    DB.campaigns.push({id: genCampId(), location, start, end, note: note||""});
+    DB.campaigns.sort((a,b)=> (a.location+a.start).localeCompare(b.location+b.start));
+    saveDB();
+  }
+  function delCampaign(id){
+    DB.campaigns = DB.campaigns.filter(c=>c.id!==id);
+    saveDB();
+  }
+
+  // ---------- Rendering ----------
+  function renderHome(){
+    const location = $("h_loc").value || DB.locations[0];
+    const month = $("h_month").value || monthISO();
+    const prev = $("h_prevmonth").value || prevMonthISO(month);
+
+    const cur = sumDaily({location, month});
+    const prv = sumDaily({location, month: prev});
+
+    $("k_rev").textContent = fmt(cur.rev);
+    $("k_rev_mom").innerHTML = `月增減/成長率：${pctText(cur.rev, prv.rev)}`;
+
+    $("k_tx").textContent = fmt(cur.tx);
+    const avgTx = cur.days>0 ? (cur.tx/cur.days) : 0;
+    $("k_tx_avg").textContent = `平均每日交易：${cur.days>0 ? avgTx.toFixed(1) : "—"}`;
+
+    const avg = cur.days>0 ? (cur.rev/cur.days) : 0;
+    $("k_avg").textContent = fmt(Math.round(avg));
+    $("k_days").textContent = `本月已輸入日報：${cur.days} 天`;
+
+    const target = getTarget(location, month);
+    if(target>0){
+      const gap = target - cur.rev;
+      $("k_gap").textContent = fmt(gap);
+      $("k_gap_hint").innerHTML = gap>0
+        ? `<span class="neg">尚差</span> ${fmt(gap)}（目標 ${fmt(target)}）`
+        : `<span class="pos">已達標</span>（目標 ${fmt(target)}）`;
+    }else{
+      $("k_gap").textContent = "—";
+      $("k_gap_hint").textContent = "到「月度類別營收」可設定月目標（可選）";
+    }
+
+    // ----- Cost breakdown -----
+    const costTB = $("costTable").querySelector("tbody");
+    costTB.innerHTML = "";
+    const c = getCost(location);
+    if(!c){
+      costTB.innerHTML = `<tr><td colspan="3" class="hint">尚未設定此點位成本。請到「成本」頁輸入。</td></tr>`;
+    }else{
+      const commRate = safeNum(c.commRate); // 0~1
+      const matRate = safeNum(c.matRate);   // 0~1
+      const commission = cur.rev * commRate;
+      const material = cur.rev * matRate;
+      const fixed = fixedSum(c);
+      const profit = cur.rev - commission - material - fixed;
+
+      const rows = [
+        ["總營業額", cur.rev, "來源：日報加總"],
+        ["抽成成本", commission, `抽成 ${(commRate*100).toFixed(1)}%`],
+        ["原物料成本", material, `原物料 ${(matRate*100).toFixed(1)}%`],
+        ["固定成本合計", fixed, "固定+水電+硬體+輸出+人力"],
+        ["淨利估算", profit, "總營業額 - 抽成 - 原物料 - 固定成本"]
+      ];
+      rows.forEach(([k,v,note])=>{
+        const cls = (k==="淨利估算") ? (v>=0 ? "pos" : "neg") : "";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td><b>${escapeHtml(k)}</b></td><td class="${cls}">${fmt(Math.round(v))}</td><td class="hint">${escapeHtml(note)}</td>`;
+        costTB.appendChild(tr);
+      });
+    }
+
+    // ----- category table: share uses total daily rev as denominator -----
+    const kCur = ensureMix(location, month);
+    const kPrv = ensureMix(location, prev);
+    const totalRev = cur.rev;
+
+    const tb = $("catTable").querySelector("tbody");
+    tb.innerHTML = "";
+
+    DB.categories.forEach(cat=>{
+      const a = safeNum(DB.monthlyMix[kCur][cat]);
+      const b = safeNum(DB.monthlyMix[kPrv][cat]);
+
+      const share = totalRev>0 ? (a/totalRev) : NaN;
+      const diff = a-b;
+      const rate = b===0 ? (a===0 ? NaN : Infinity) : (diff/b);
+
+      const shareStr = Number.isFinite(share) ? `${(share*100).toFixed(1)}%` : "—";
+      let rateStr = "—";
+      if(rate===Infinity) rateStr = "∞";
+      else if(Number.isFinite(rate)) rateStr = `${(rate*100).toFixed(1)}%`;
+
+      const diffCls = diff>0 ? "pos" : diff<0 ? "neg" : "na";
+      const diffStr = `${diff>=0?"+":""}${fmt(diff)}`;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${escapeHtml(cat)}</b></td>
+        <td>${fmt(a)}</td>
+        <td>${shareStr}</td>
+        <td class="${diffCls}">${diffStr}</td>
+        <td class="${diffCls}">${rateStr}</td>
+      `;
+      tb.appendChild(tr);
+    });
+
+    // ----- promo rank -----
+    const promoDays = cur.rows.filter(r=>r.isPromo==="yes").map(r=>r.date);
+    const agg = {}; // flavor -> {qty, daysCount}
+    promoDays.forEach(date=>{
+      const k = keyPromo({location, date});
+      const obj = DB.promoFlavors[k] || {};
+      const seen = new Set();
+      Object.keys(obj).forEach(fl=>{
+        const q = safeNum(obj[fl]);
+        if(q<=0) return;
+        agg[fl] ||= {qty:0, days:0};
+        agg[fl].qty += q;
+        seen.add(fl);
+      });
+      seen.forEach(fl=>{ agg[fl].days += 1; });
+    });
+
+    const rankTB = $("promoRankTable").querySelector("tbody");
+    rankTB.innerHTML = "";
+
+    const sorted = Object.entries(agg)
+      .sort((a,b)=> b[1].qty - a[1].qty)
+      .slice(0, 15);
+
+    if(promoDays.length===0){
+      rankTB.innerHTML = `<tr><td colspan="4" class="hint">本月日報沒有標記活動日（is_promo=yes）。請先在「日報」把活動日設為是。</td></tr>`;
+    }else if(sorted.length===0){
+      rankTB.innerHTML = `<tr><td colspan="4" class="hint">本月有 ${promoDays.length} 個活動日，但尚未輸入活動口味。請到「活動口味」頁補上。</td></tr>`;
+    }else{
+      sorted.forEach(([fl, v], idx)=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${idx+1}</td><td><b>${escapeHtml(fl)}</b></td><td>${fmt(v.qty)}</td><td>${fmt(v.days)}</td>`;
+        rankTB.appendChild(tr);
+      });
+    }
+
+    $("homeMsg").textContent =
+      totalRev===0
+        ? "本月日報總營收目前為 0（或尚未輸入日報）。類別佔比會以總營收當分母。"
+        : `總營收（分母）：${fmt(totalRev)}；類別佔比以此計算（含八入組）。活動排行只統計日報標記為活動日的日期。`;
+  }
+
+  function renderDaily(){
+    const location = $("h_loc").value || DB.locations[0];
+    const month = $("h_month").value || monthISO();
+    const rows = DB.daily
+      .filter(d=> d.location===location && dateToMonth(d.date)===month)
+      .sort((a,b)=>a.date.localeCompare(b.date));
+
+    const tb = $("dailyTable").querySelector("tbody");
+    tb.innerHTML = "";
+    for(const r of rows){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(r.date)}</td>
+        <td>${escapeHtml(r.location)}</td>
+        <td>${fmt(safeNum(r.amount))}</td>
+        <td>${fmt(safeNum(r.tx))}</td>
+        <td>${r.isPromo==="yes" ? "✅" : "—"}</td>
+        <td>${escapeHtml(r.note||"")}</td>
+        <td><button class="danger" data-del="${escapeHtml(r.date)}||${escapeHtml(r.location)}">刪除</button></td>
+      `;
+      tb.appendChild(tr);
+    }
+
+    tb.querySelectorAll("button[data-del]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const [date, loc] = btn.dataset.del.split("||");
+        if(confirm(`刪除 ${date}（${loc}）這筆日報？`)){
+          delDaily(date, loc);
+          renderAll();
+        }
+      });
+    });
+
+    $("dailyMsg").textContent = `顯示：${location}｜${month}｜共 ${rows.length} 筆`;
+  }
+
+  function renderMix(){
+    const location = $("m_loc").value || DB.locations[0];
+    const month = $("m_month").value || monthISO();
+    const key = ensureMix(location, month);
+
+    const daily = sumDaily({location, month});
+    const totalRev = daily.rev;
+
+    $("m_target").value = getTarget(location, month) ? String(getTarget(location, month)) : "";
+
+    $("mixHint").innerHTML =
+      `總營業額（來自日報加總）：<b>${fmt(totalRev)}</b>　｜　類別佔比 = 類別營收 ÷ 總營業額（含八入組）`;
+
+    const tb = $("mixTable").querySelector("tbody");
+    tb.innerHTML = "";
+
+    DB.categories.forEach(cat=>{
+      const v = safeNum(DB.monthlyMix[key][cat]);
+      const share = totalRev>0 ? (v/totalRev) : NaN;
+      const shareStr = Number.isFinite(share) ? `${(share*100).toFixed(1)}%` : "—";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${escapeHtml(cat)}</b></td>
+        <td>
+          <input data-cat="${escapeHtml(cat)}" type="number" inputmode="numeric" value="${v}" />
+          <div class="hint">輸入後「離開欄位」才會更新（不會跳格）</div>
+        </td>
+        <td>${shareStr}</td>
+      `;
+      tb.appendChild(tr);
+    });
+
+    tb.querySelectorAll("input[data-cat]").forEach(inp=>{
+      inp.addEventListener("change", ()=>{
+        const cat = inp.dataset.cat;
+        DB.monthlyMix[key][cat] = safeNum(inp.value);
+        saveDB();
+        renderAll();
+      });
+    });
+
+    $("mixMsg").textContent = `點位：${location}｜月份：${month}`;
+  }
+
+  function renderPromo(){
+    const location = $("h_loc").value || DB.locations[0];
+    const month = $("h_month").value || monthISO();
+
+    const d = sumDaily({location, month});
+    const promoDays = d.rows.filter(r=>r.isPromo==="yes").sort((a,b)=>a.date.localeCompare(b.date));
+
+    const tb = $("promoDaysTable").querySelector("tbody");
+    tb.innerHTML = "";
+    promoDays.forEach(r=>{
+      const filled = hasPromoFilled(location, r.date);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(r.date)}</td>
+        <td>${fmt(safeNum(r.amount))}</td>
+        <td>${fmt(safeNum(r.tx))}</td>
+        <td>${filled ? "✅ 已填" : "— 未填"}</td>
+      `;
+      tb.appendChild(tr);
+    });
+    if(promoDays.length===0){
+      tb.innerHTML = `<tr><td colspan="4" class="hint">本月日報沒有活動日（is_promo=yes）。先去「日報」把活動日設為是。</td></tr>`;
+    }
+
+    const date = $("p_date").value;
+    const loc = $("p_loc").value;
+    const key = ensurePromo(loc, date);
+
+    const editTB = $("promoEditTable").querySelector("tbody");
+    editTB.innerHTML = "";
+
+    const existing = DB.promoFlavors[key] || {};
+    const list = Object.keys(existing).length
+      ? Object.keys(existing).sort((a,b)=> (TOAST_FLAVORS.indexOf(a)-TOAST_FLAVORS.indexOf(b)))
+      : [];
+
+    list.forEach(fl=>{
+      const q = safeNum(existing[fl]);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${escapeHtml(fl)}</b></td>
+        <td><input data-fl="${escapeHtml(fl)}" type="number" inputmode="numeric" value="${q}" /></td>
+        <td><button class="danger" data-rm="${escapeHtml(fl)}">刪除</button></td>
+      `;
+      editTB.appendChild(tr);
+    });
+
+    if(list.length===0){
+      editTB.innerHTML = `<tr><td colspan="3" class="hint">尚未新增口味行。你可以用上方「快速新增一行」加入口味。</td></tr>`;
+    }else{
+      editTB.querySelectorAll("input[data-fl]").forEach(inp=>{
+        inp.addEventListener("change", ()=>{
+          const fl = inp.dataset.fl;
+          DB.promoFlavors[key][fl] = safeNum(inp.value);
+          saveDB();
+          $("promoMsg").textContent = "已自動儲存 ✅";
+          renderAll();
+        });
+      });
+      editTB.querySelectorAll("button[data-rm]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const fl = btn.dataset.rm;
+          delete DB.promoFlavors[key][fl];
+          saveDB();
+          renderAll();
+        });
+      });
+    }
+
+    $("promoMsg").textContent = `活動口味：${loc}｜${date}`;
+  }
+
+  function renderCost(){
+    const location = $("cst_loc").value || DB.locations[0];
+    const c = getCost(location);
+
+    $("cst_comm").value = c ? String((safeNum(c.commRate)*100).toFixed(2)).replace(/\.?0+$/,"") : "";
+    $("cst_fixed").value = c ? String(safeNum(c.fixed)) : "";
+    $("cst_util").value  = c ? String(safeNum(c.util)) : "";
+    $("cst_hw").value    = c ? String(safeNum(c.hw)) : "";
+    $("cst_out").value   = c ? String(safeNum(c.out)) : "";
+    $("cst_labor").value = c ? String(safeNum(c.labor)) : "";
+    $("cst_mat").value   = c ? String((safeNum(c.matRate)*100).toFixed(2)).replace(/\.?0+$/,"") : "";
+
+    const tb = $("costManageTable").querySelector("tbody");
+    tb.innerHTML = "";
+    const locs = [...DB.locations].sort((a,b)=>a.localeCompare(b));
+    let any = false;
+
+    locs.forEach(loc=>{
+      const cc = getCost(loc);
+      if(!cc) return;
+      any = true;
+      const comm = (safeNum(cc.commRate)*100);
+      const mat  = (safeNum(cc.matRate)*100);
+      const fixed = fixedSum(cc);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${escapeHtml(loc)}</b></td>
+        <td>${comm.toFixed(1)}%</td>
+        <td>${fmt(fixed)}</td>
+        <td>${mat.toFixed(1)}%</td>
+        <td><button class="danger" data-delc="${escapeHtml(loc)}">刪除</button></td>
+      `;
+      tb.appendChild(tr);
+    });
+
+    if(!any){
+      tb.innerHTML = `<tr><td colspan="5" class="hint">尚未設定任何點位成本。選一個點位輸入後按「儲存成本設定」。</td></tr>`;
+    }
+
+    tb.querySelectorAll("button[data-delc]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const loc = btn.dataset.delc;
+        if(confirm(`刪除「${loc}」的成本設定？`)){
+          delCost(loc);
+          renderAll();
+        }
+      });
+    });
+
+    $("costMsg").textContent = "成本設定會用於總覽的成本估算。";
+  }
+
+  function daysInMonth(ym){
+    const [y,m] = ym.split("-").map(Number);
+    return new Date(y, m, 0).getDate();
+  }
+  function dateToNum(iso){
+    const d = new Date(iso+"T00:00:00");
+    return Math.floor(d.getTime()/86400000);
+  }
+
+  function renderGantt(){
+    const mode = $("g_mode").value;
+    const month = $("g_month").value || monthISO();
+    const year = Number($("g_year").value) || new Date().getFullYear();
+
+    let rangeStart, rangeEnd, labels=[];
+    if(mode==="month"){
+      const [y,m] = month.split("-").map(Number);
+      rangeStart = `${y}-${String(m).padStart(2,"0")}-01`;
+      rangeEnd = `${y}-${String(m).padStart(2,"0")}-${String(daysInMonth(month)).padStart(2,"0")}`;
+      labels = Array.from({length:daysInMonth(month)}, (_,i)=>String(i+1));
+      $("g_rangeHint").textContent = `顯示範圍：${rangeStart} ～ ${rangeEnd}`;
+    }else{
+      rangeStart = `${year}-01-01`;
+      rangeEnd = `${year}-12-31`;
+      labels = ["1","2","3","4","5","6","7","8","9","10","11","12"];
+      $("g_rangeHint").textContent = `顯示範圍：${rangeStart} ～ ${rangeEnd}`;
+    }
+
+    const sNum = dateToNum(rangeStart);
+    const eNum = dateToNum(rangeEnd);
+    const span = Math.max(eNum - sNum + 1, 1);
+
+    const items = DB.campaigns
+      .filter(c=>c.start && c.end)
+      .filter(c=>{
+        const a = dateToNum(c.start), b = dateToNum(c.end);
+        return !(b < sNum || a > eNum);
+      })
+      .sort((a,b)=> (a.location||"").localeCompare(b.location||"") || (a.start||"").localeCompare(b.start||""));
+
+    const byLoc = {};
+    for(const c of items){
+      byLoc[c.location] ||= [];
+      byLoc[c.location].push(c);
+    }
+
+    const wrap = $("ganttWrap");
+    let html = `
+      <div class="gantt">
+        <div class="ganttHead">
+          <div class="left">點位</div>
+          <div class="right">
+            ${labels.map(l=>`<div class="cell">${l}</div>`).join("")}
+          </div>
+        </div>
+    `;
+
+    const locs = Object.keys(byLoc);
+    if(locs.length===0){
+      html += `<div style="padding:14px; color:var(--muted)">此範圍沒有檔期資料</div></div>`;
+      wrap.innerHTML = html;
+    }else{
+      for(const loc of locs){
+        const rows = byLoc[loc];
+        const bars = rows.map((c, idx)=>{
+          const a = Math.max(dateToNum(c.start), sNum);
+          const b = Math.min(dateToNum(c.end), eNum);
+          const leftPct = ((a - sNum) / span) * 100;
+          const widthPct = ((b - a + 1) / span) * 100;
+          const top = 12 + idx * 34;
+
+          const note = (c.note||"").trim() || "（未填備註）";
+          const meta = `${c.start}~${c.end}`;
+
+          return `
+            <div class="ganttBar" style="left:${leftPct}%; width:${widthPct}%; top:${top}px;">
+              <span class="note">${escapeHtml(note)}</span>
+              <span class="meta">${escapeHtml(meta)}</span>
+            </div>
+          `;
+        }).join("");
+
+        const h = 12 + rows.length * 34;
+
+        html += `
+          <div class="ganttRow">
+            <div class="left">${escapeHtml(loc)}</div>
+            <div class="right" style="height:${h}px;">
+              ${bars}
+            </div>
+          </div>
+        `;
+      }
+      html += `</div>`;
+      wrap.innerHTML = html;
+    }
+
+    const tb = $("campTable").querySelector("tbody");
+    tb.innerHTML = "";
+    DB.campaigns
+      .slice()
+      .sort((a,b)=> (a.location+a.start).localeCompare(b.location+b.start))
+      .forEach(c=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(c.location)}</td>
+          <td>${escapeHtml(c.start)}</td>
+          <td>${escapeHtml(c.end)}</td>
+          <td>${escapeHtml(c.note||"")}</td>
+          <td><button class="danger" data-cdel="${escapeHtml(c.id)}">刪除</button></td>
+        `;
+        tb.appendChild(tr);
+      });
+
+    tb.querySelectorAll("button[data-cdel]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.dataset.cdel;
+        if(confirm("刪除這個檔期？（只影響甘特圖）")){
+          delCampaign(id);
+          renderAll();
+        }
+      });
+    });
+
+    $("ganttMsg").textContent = `檔期共 ${DB.campaigns.length} 筆（只用來顯示排程與備註）`;
+  }
+
+  function renderSettings(){
+    const lt = $("locTable").querySelector("tbody");
+    lt.innerHTML = "";
+    [...DB.locations].sort((a,b)=>a.localeCompare(b)).forEach(loc=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${escapeHtml(loc)}</b></td>
+        <td><button class="btn2" data-rename="${escapeHtml(loc)}">重命名</button></td>
+        <td><button class="danger" data-del="${escapeHtml(loc)}">刪除</button></td>
+      `;
+      lt.appendChild(tr);
+    });
+
+    lt.querySelectorAll("button[data-rename]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const oldLoc = btn.dataset.rename;
+        const n = prompt(`把「${oldLoc}」改成：`);
+        if(!n) return;
+        const newLoc = n.trim();
+        if(!newLoc) return;
+
+        DB.locations = DB.locations.map(x=> x===oldLoc ? newLoc : x);
+        DB.daily = DB.daily.map(d=> d.location===oldLoc ? {...d, location:newLoc} : d);
+
+        const remapKey2 = (obj)=>{
+          const out = {};
+          for(const k of Object.keys(obj)){
+            const [loc, mo] = k.split("||");
+            const nk = `${(loc===oldLoc?newLoc:loc)}||${mo}`;
+            out[nk] = obj[k];
+          }
+          return out;
+        };
+        DB.monthlyMix = remapKey2(DB.monthlyMix);
+        DB.targets = remapKey2(DB.targets);
+
+        DB.campaigns = DB.campaigns.map(c=> c.location===oldLoc ? {...c, location:newLoc} : c);
+
+        const newPromo = {};
+        for(const k of Object.keys(DB.promoFlavors)){
+          const [loc, date] = k.split("||");
+          const nk = `${(loc===oldLoc?newLoc:loc)}||${date}`;
+          newPromo[nk] = DB.promoFlavors[k];
+        }
+        DB.promoFlavors = newPromo;
+
+        if(DB.costs[oldLoc]){
+          DB.costs[newLoc] = DB.costs[oldLoc];
+          delete DB.costs[oldLoc];
+        }
+
+        saveDB();
+        initSelectors();
+        renderAll();
+      });
+    });
+
+    lt.querySelectorAll("button[data-del]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const loc = btn.dataset.del;
+        if(DB.locations.length<=1){
+          alert("至少保留 1 個點位。");
+          return;
+        }
+        if(confirm(`刪除點位「${loc}」？（會同時刪除此點位的所有日報/月報/檔期/活動口味/成本資料）`)){
+          DB.locations = DB.locations.filter(x=>x!==loc);
+          DB.daily = DB.daily.filter(d=>d.location!==loc);
+
+          const keepKey2 = (obj)=>{
+            const out = {};
+            for(const k of Object.keys(obj)){
+              const [l] = k.split("||");
+              if(l!==loc) out[k]=obj[k];
+            }
+            return out;
+          };
+          DB.monthlyMix = keepKey2(DB.monthlyMix);
+          DB.targets = keepKey2(DB.targets);
+          DB.campaigns = DB.campaigns.filter(c=>c.location!==loc);
+
+          const newPromo = {};
+          for(const k of Object.keys(DB.promoFlavors)){
+            const [l] = k.split("||");
+            if(l!==loc) newPromo[k]=DB.promoFlavors[k];
+          }
+          DB.promoFlavors = newPromo;
+
+          delete DB.costs[loc];
+
+          saveDB();
+          initSelectors();
+          renderAll();
+        }
+      });
+    });
+
+    const ct = $("catManageTable").querySelector("tbody");
+    ct.innerHTML = "";
+    DB.categories.forEach(cat=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${escapeHtml(cat)}</b></td>
+        <td><button class="danger" data-cdel="${escapeHtml(cat)}">刪除</button></td>
+      `;
+      ct.appendChild(tr);
+    });
+
+    ct.querySelectorAll("button[data-cdel]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const cat = btn.dataset.cdel;
+        if(DB.categories.length<=1){
+          alert("至少保留 1 個類別。");
+          return;
+        }
+        if(confirm(`刪除類別「${cat}」？（不會刪日報，但會移除月度類別營收欄位）`)){
+          DB.categories = DB.categories.filter(x=>x!==cat);
+          Object.keys(DB.monthlyMix).forEach(k=>{
+            delete DB.monthlyMix[k][cat];
+          });
+          saveDB();
+          renderAll();
+        }
+      });
+    });
+
+    $("settingsMsg").textContent = "你可以在這裡維護點位與類別。";
+  }
+
+  function renderBackup(){
+    $("backupMsg").textContent = "建議每週匯出一次備份（JSON）。";
+  }
+
+  function renderAll(){
+    initSelectors();
+    renderHome();
+    renderDaily();
+    renderMix();
+    renderPromo();
+    renderCost();
+    renderGantt();
+    renderSettings();
+    renderBackup();
+  }
+
+  // ---------- Events ----------
+  $("tabs").addEventListener("click", (e)=>{
+    const el = e.target.closest(".tab");
+    if(!el) return;
+    setTab(el.dataset.tab);
+  });
+
+  // Home controls
+  $("h_month").addEventListener("change", ()=>{
+    $("h_prevmonth").value = prevMonthISO($("h_month").value);
+    $("m_month").value = $("h_month").value;
+    $("g_month").value = $("h_month").value;
+    renderAll();
+  });
+  $("h_loc").addEventListener("change", ()=>{
+    $("d_loc").value = $("h_loc").value;
+    $("m_loc").value = $("h_loc").value;
+    $("p_loc").value = $("h_loc").value;
+    $("cst_loc").value = $("h_loc").value;
+    $("cg_loc").value = $("h_loc").value;
+    renderAll();
+  });
+  $("h_prevmonth").addEventListener("change", renderAll);
+  $("h_this").addEventListener("click", ()=>{
+    const m = monthISO();
+    $("h_month").value = m;
+    $("h_prevmonth").value = prevMonthISO(m);
+    $("m_month").value = m;
+    $("g_month").value = m;
+    renderAll();
+  });
+
+  // Daily
+  $("btnSaveDaily").addEventListener("click", ()=>{
+    const date = $("d_date").value;
+    const location = $("d_loc").value;
+    if(!date || !location){
+      $("dailyMsg").textContent = "請先選擇日期與點位。";
+      return;
+    }
+    upsertDaily({
+      date,
+      location,
+      amount: safeNum($("d_amt").value),
+      tx: safeNum($("d_tx").value),
+      isPromo: $("d_promo").value,
+      note: ($("d_note").value||"").trim()
+    });
+    $("dailyMsg").textContent = "已儲存 ✅";
+    renderAll();
+  });
+  $("btnClearDaily").addEventListener("click", ()=>{
+    $("d_amt").value = "";
+    $("d_tx").value = "";
+    $("d_note").value = "";
+    $("d_promo").value = "no";
+    $("dailyMsg").textContent = "";
+  });
+
+  // Mix
+  $("m_load").addEventListener("click", renderAll);
+  $("m_month").addEventListener("change", ()=>{
+    $("h_month").value = $("m_month").value;
+    $("h_prevmonth").value = prevMonthISO($("m_month").value);
+    renderAll();
+  });
+  $("m_loc").addEventListener("change", ()=>{
+    $("h_loc").value = $("m_loc").value;
+    renderAll();
+  });
+  $("m_target").addEventListener("change", ()=>{
+    const location = $("m_loc").value;
+    const month = $("m_month").value;
+    setTarget(location, month, $("m_target").value);
+    renderAll();
+  });
+
+  // Promo
+  $("p_date").addEventListener("change", renderAll);
+  $("p_loc").addEventListener("change", renderAll);
+
+  $("btnAddFlavorRow").addEventListener("click", ()=>{
+    const date = $("p_date").value;
+    const loc = $("p_loc").value;
+    if(!date || !loc){
+      $("promoMsg").textContent = "請先選日期與點位。";
+      return;
+    }
+    const k = ensurePromo(loc, date);
+    const flavor = $("p_flavorPick").value;
+    if(!TOAST_FLAVORS.includes(flavor)){
+      $("promoMsg").textContent = "口味不在清單內，請用下拉選擇。";
+      return;
+    }
+    if(!(flavor in DB.promoFlavors[k])) DB.promoFlavors[k][flavor] = 0;
+    saveDB();
+    renderAll();
+  });
+
+  $("btnSavePromo").addEventListener("click", ()=>{
+    $("promoMsg").textContent = "已儲存 ✅";
+    renderAll();
+  });
+
+  $("btnClearPromo").addEventListener("click", ()=>{
+    const date = $("p_date").value;
+    const loc = $("p_loc").value;
+    if(!date || !loc) return;
+    const k = keyPromo({location:loc, date});
+    if(confirm(`清空 ${loc}｜${date} 的活動口味？`)){
+      DB.promoFlavors[k] = {};
+      saveDB();
+      renderAll();
+    }
+  });
+
+  // Cost
+  $("cst_loc").addEventListener("change", renderAll);
+
+  $("btnSaveCost").addEventListener("click", ()=>{
+    const loc = $("cst_loc").value;
+    if(!loc){
+      $("costMsg").textContent = "請先選點位。";
+      return;
+    }
+    const commRate = safeNum($("cst_comm").value) / 100;
+    const matRate  = safeNum($("cst_mat").value)  / 100;
+
+    setCost(loc, {
+      commRate: Math.max(0, commRate),
+      fixed: safeNum($("cst_fixed").value),
+      util:  safeNum($("cst_util").value),
+      hw:    safeNum($("cst_hw").value),
+      out:   safeNum($("cst_out").value),
+      labor: safeNum($("cst_labor").value),
+      matRate: Math.max(0, matRate)
+    });
+
+    $("costMsg").textContent = "已儲存成本設定 ✅";
+    renderAll();
+  });
+
+  $("btnClearCost").addEventListener("click", ()=>{
+    $("cst_comm").value = "";
+    $("cst_fixed").value = "";
+    $("cst_util").value = "";
+    $("cst_hw").value = "";
+    $("cst_out").value = "";
+    $("cst_labor").value = "";
+    $("cst_mat").value = "";
+    $("costMsg").textContent = "";
+  });
+
+  // Gantt
+  $("g_mode").addEventListener("change", renderAll);
+  $("g_month").addEventListener("change", renderAll);
+  $("g_year").addEventListener("change", renderAll);
+
+  $("g_today").addEventListener("click", ()=>{
+    const m = monthISO();
+    $("g_month").value = m;
+    $("g_year").value = String(new Date().getFullYear());
+    $("h_month").value = m;
+    $("h_prevmonth").value = prevMonthISO(m);
+    renderAll();
+  });
+
+  $("btnAddCampaign").addEventListener("click", ()=>{
+    const location = $("cg_loc").value;
+    const start = $("cg_start").value;
+    const end = $("cg_end").value;
+    const note = ($("cg_note").value||"").trim();
+
+    if(!location || !start || !end){
+      $("ganttMsg").textContent = "請填點位、開始日期、結束日期。";
+      return;
+    }
+    if(end < start){
+      $("ganttMsg").textContent = "結束日期不能早於開始日期。";
+      return;
+    }
+
+    addCampaign({location, start, end, note});
+    $("ganttMsg").textContent = "已新增檔期 ✅";
+    renderAll();
+  });
+
+  $("btnClearCampaign").addEventListener("click", ()=>{
+    $("cg_start").value = "";
+    $("cg_end").value = "";
+    $("cg_note").value = "";
+    $("ganttMsg").textContent = "";
+  });
+
+  // Settings: add location/category
+  $("btnAddLoc").addEventListener("click", ()=>{
+    const v = ($("s_newLoc").value||"").trim();
+    if(!v) return;
+    if(DB.locations.includes(v)){
+      $("settingsMsg").textContent = "此點位已存在。";
+      return;
+    }
+    DB.locations.push(v);
+    $("s_newLoc").value = "";
+    saveDB();
+    initSelectors();
+    renderAll();
+  });
+
+  $("btnAddCat").addEventListener("click", ()=>{
+    const v = ($("s_newCat").value||"").trim();
+    if(!v) return;
+    if(DB.categories.includes(v)){
+      $("settingsMsg").textContent = "此類別已存在。";
+      return;
+    }
+    DB.categories.push(v);
+    $("s_newCat").value = "";
+    saveDB();
+    renderAll();
+  });
+
+  // Backup
+  function downloadText(filename, text){
+    const blob = new Blob([text], {type:"application/json;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  $("btnExport").addEventListener("click", ()=>{
+    const name = `island_sales_backup_${new Date().toISOString().slice(0,10)}.json`;
+    downloadText(name, JSON.stringify(DB, null, 2));
+    $("backupMsg").textContent = "已匯出備份 ✅";
+  });
+
+  $("importJson").addEventListener("change", async (e)=>{
+    const f = e.target.files?.[0];
+    if(!f) return;
+    try{
+      const txt = await f.text();
+      const obj = JSON.parse(txt);
+      if(!obj || !Array.isArray(obj.locations) || !Array.isArray(obj.daily)){
+        throw new Error("格式不正確");
+      }
+      Object.keys(DB).forEach(k=> delete DB[k]);
+      Object.assign(DB, obj);
+
+      saveDB();
+      initSelectors();
+      renderAll();
+      $("backupMsg").textContent = "已匯入備份 ✅";
+    }catch(err){
+      $("backupMsg").textContent = "匯入失敗：JSON 格式不正確。";
+    }finally{
+      e.target.value = "";
+    }
+  });
+
+  $("btnReset").addEventListener("click", ()=>{
+    if(!confirm("確定清空所有資料？此動作無法復原（除非你有備份）。")) return;
+    localStorage.removeItem("ISLAND_SALES_TOOL_V3");
+    location.reload();
+  });
+
+  // Initial
+  initSelectors();
+  renderAll();
+</script>
+</body>
+</html>
